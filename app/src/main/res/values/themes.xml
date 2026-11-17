@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Vet2MyFriend" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Vet2MyFriend.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.Vet2MyFriend</item>
+    </style>
+</resources>

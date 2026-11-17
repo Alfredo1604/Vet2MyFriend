@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Vet2MyFriend</string>
+    <string name="welcome_title">Bienvenido a Vet2MyFriend</string>
+    <string name="welcome_description">Encuentra atención veterinaria gratuita o de bajo costo.</string>
+    <string name="welcome_continue">Ver directorio</string>
+    <string name="tab_home">Inicio</string>
+    <string name="tab_routes">Mis rutas</string>
+    <string name="tab_diary">Diario</string>
+    <string name="tab_settings">Configuración</string>
+    <string name="section_unavailable">%1$s estará disponible más adelante.</string>
+</resources>
