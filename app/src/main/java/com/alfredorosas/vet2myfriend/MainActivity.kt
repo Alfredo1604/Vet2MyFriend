@@ -3,6 +3,7 @@ package com.alfredorosas.vet2myfriend
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.BackHandler
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
@@ -15,9 +16,18 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.alfredorosas.vet2myfriend.feature.directory.DirectoryScreen
 import com.alfredorosas.vet2myfriend.feature.directory.DirectoryViewModel
+import com.alfredorosas.vet2myfriend.feature.directory.RouteViewModel
 import com.alfredorosas.vet2myfriend.ui.theme.Vet2MyFriendTheme
 
 class MainActivity : ComponentActivity() {
+    private val routeViewModel by viewModels<RouteViewModel> {
+        viewModelFactory {
+            initializer {
+                val app = application as Vet2MyFriendApplication
+                RouteViewModel(app.routingRepository, app.geocodingRepository, app.locationProvider)
+            }
+        }
+    }
     private val directoryViewModel by viewModels<DirectoryViewModel> {
         viewModelFactory {
             initializer {
@@ -45,7 +55,21 @@ class MainActivity : ComponentActivity() {
                 } else {
                     AppShell { modifier ->
                         val state by directoryViewModel.uiState.collectAsStateWithLifecycle()
-                        DirectoryScreen(state, directoryViewModel::retry, modifier)
+                        val routeState by routeViewModel.uiState.collectAsStateWithLifecycle()
+                        val requestLocation = rememberLocationPermissionRequest(
+                            onGranted = routeViewModel::useCurrentLocation,
+                            onDenied = routeViewModel::locationPermissionDenied,
+                        )
+                        BackHandler(enabled = routeState.clinic != null) { routeViewModel.close() }
+                        DirectoryScreen(
+                            state = state,
+                            onRetry = directoryViewModel::retry,
+                            mapsConfigured = BuildConfig.MAPS_CONFIGURED,
+                            routeState = routeState,
+                            onRouteAction = routeViewModel::onAction,
+                            onRequestLocation = requestLocation,
+                            modifier = modifier,
+                        )
                     }
                 }
             }

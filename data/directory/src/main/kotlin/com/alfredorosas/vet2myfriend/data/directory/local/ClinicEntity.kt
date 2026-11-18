@@ -9,4 +9,6 @@ internal data class ClinicEntity(
     val name: String,
     val address: String,
     val municipality: String,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
 )

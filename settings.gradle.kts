@@ -26,4 +26,5 @@ rootProject.name = "Vet2MyFriend"
 include(":app")
 include(":core:domain")
 include(":data:directory")
+include(":data:routing")
 include(":feature:directory")

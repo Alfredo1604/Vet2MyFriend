@@ -9,13 +9,13 @@ internal object InitialClinicCatalog : RoomDatabase.Callback() {
             ClinicEntity(
                 id = "guadalupe-la-hacienda",
                 name = "Centro de Bienestar Animal",
-                address = "Av. la Hacienda 1312, Guadalupe, N.L.",
+                address = "Av. la Hacienda 1312, Sin Nombre de Col 30, 67155 Guadalupe, N.L.",
                 municipality = "Guadalupe",
             ),
             ClinicEntity(
                 id = "guadalupe-los-pequenos-amigos",
                 name = "Los Pequeños Amigos",
-                address = "Av. Circunvalación y 20 de Noviembre, Nuevo San Rafael, Guadalupe, N.L.",
+                address = "20 de Noviembre, Nuevo San Rafael, 67110 Guadalupe, N.L.",
                 municipality = "Guadalupe",
             ),
         )
@@ -25,5 +25,6 @@ internal object InitialClinicCatalog : RoomDatabase.Callback() {
                 arrayOf(clinic.id, clinic.name, clinic.address, clinic.municipality),
             )
         }
+        insertReportedServices(db)
     }
 }
