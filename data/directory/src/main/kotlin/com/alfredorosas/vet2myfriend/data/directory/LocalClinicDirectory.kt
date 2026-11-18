@@ -2,6 +2,12 @@ package com.alfredorosas.vet2myfriend.data.directory
 
 import android.content.Context
 import androidx.room.Room
+import com.alfredorosas.vet2myfriend.domain.GeoPoint
+import com.alfredorosas.vet2myfriend.domain.model.ClinicService
+import com.alfredorosas.vet2myfriend.data.directory.local.ClinicServiceEntity
+import com.alfredorosas.vet2myfriend.data.directory.local.ClinicWithServices
+import com.alfredorosas.vet2myfriend.data.directory.local.MIGRATION_2_3
+import com.alfredorosas.vet2myfriend.data.directory.local.MIGRATION_1_2
 import com.alfredorosas.vet2myfriend.data.directory.local.ClinicDao
 import com.alfredorosas.vet2myfriend.data.directory.local.ClinicEntity
 import com.alfredorosas.vet2myfriend.data.directory.local.DirectoryDatabase
@@ -14,19 +20,39 @@ data class ClinicRecord(
     val name: String,
     val address: String,
     val municipality: String,
+    val location: GeoPoint? = null,
+    val services: List<ClinicService> = emptyList(),
 )
 
 /** Local source for the directory. The app should keep one instance for its lifetime. */
 class LocalClinicDirectory private constructor(private val dao: ClinicDao) {
 
     fun observeClinics(): Flow<List<ClinicRecord>> =
-        dao.observeAll().map { clinics -> clinics.map { it.toRecord() } }
+        dao.observeAllWithServices().map { clinics ->
+            clinics.map { it.toRecord() }
+        }
 
     fun observeClinic(id: String): Flow<ClinicRecord?> =
-        dao.observeById(id).map { it?.toRecord() }
+        dao.observeWithServices(id).map { it?.toRecord() }
 
     suspend fun upsertClinics(clinics: List<ClinicRecord>) {
-        dao.upsert(clinics.map { ClinicEntity(it.id, it.name, it.address, it.municipality) })
+        dao.upsertWithServices(
+            clinics.map { clinic ->
+                ClinicEntity(
+                    id = clinic.id,
+                    name = clinic.name,
+                    address = clinic.address,
+                    municipality = clinic.municipality,
+                    latitude = clinic.location?.latitude,
+                    longitude = clinic.location?.longitude,
+                )
+            },
+            clinics.flatMap { clinic ->
+                clinic.services.map {
+                    ClinicServiceEntity(clinic.id, it.service, it.price?.toPlainString(), it.doctor)
+                }
+            },
+        )
     }
 
     companion object {
@@ -35,11 +61,26 @@ class LocalClinicDirectory private constructor(private val dao: ClinicDao) {
                 context.applicationContext,
                 DirectoryDatabase::class.java,
                 "vet2myfriend-directory.db",
-            ).addCallback(InitialClinicCatalog).build()
+            )
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addCallback(InitialClinicCatalog)
+                .build()
             return LocalClinicDirectory(database.clinicDao())
         }
     }
 }
 
 private fun ClinicEntity.toRecord(): ClinicRecord =
-    ClinicRecord(id, name, address, municipality)
+    ClinicRecord(
+        id = id,
+        name = name,
+        address = address,
+        municipality = municipality,
+        location = if (latitude != null && longitude != null) GeoPoint(latitude, longitude) else null,
+    )
+
+private fun ClinicWithServices.toRecord(): ClinicRecord = clinic.toRecord().copy(
+    services = services.sortedBy { it.service }.map {
+        ClinicService(it.price?.toBigDecimal(), it.service, it.doctor)
+    },
+)

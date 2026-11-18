@@ -2,7 +2,7 @@ package com.alfredorosas.vet2myfriend.feature.directory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.alfredorosas.vet2myfriend.domain.ClinicRepository
+import com.alfredorosas.vet2myfriend.domain.repository.ClinicRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +26,7 @@ class DirectoryViewModel(private val repository: ClinicRepository) : ViewModel()
                 .catch { state.value = DirectoryUiState.Error }
                 .collect { clinics ->
                     state.value = DirectoryUiState.Ready(
-                        clinics.map { ClinicListItem(it.id, it.name, it.address) },
+                        clinics,
                     )
                 }
         }

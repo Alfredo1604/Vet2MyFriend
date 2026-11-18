@@ -21,6 +21,10 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    implementation(libs.google.maps.compose)
+    implementation(libs.androidx.compose.foundation)
     implementation(project(":core:domain"))
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(platform(libs.androidx.compose.bom))
